@@ -1,116 +1,165 @@
-// 🎮 ESTADO
-let estado = {
-  pontos: 0
-};
 
-// 🧍 ATRIBUTOS
-const personagem = {
-  danoBase: 5,
-  proficiencia: 3
-};
+console.log("SCRIPT CARREGADO");''
 
-// 🎖️ RANK
-function calcularRank(pontos) {
+let pontos = 0;
+const max = 10;
+
+let danoBase = 5; // DEX 20
+let proficiencia = 3;
+
+/* RANK */
+function getRank(pontos) {
+  if (pontos === 0) return null;
+
   if (pontos >= 10) return "SSS";
   if (pontos >= 7) return "SS";
   if (pontos >= 5) return "S";
   if (pontos >= 4) return "A";
   if (pontos >= 3) return "B";
   if (pontos >= 2) return "C";
-  if (pontos >= 1) return "D";
-  return "-";
+  return "D";
 }
 
-// 🧠 HABILIDADES
+/* HABILIDADES */
 const habilidadesPorRank = {
-  "D": [{ nome: "Impulso Inicial", efeito: "1º acerto: +½ proficiência no ataque" }],
+  "D": [{ nome: "Impulso Inicial", efeito: "1º acerto: metade da proficiência no ataque" }],
   "C": [{ nome: "Golpe Preciso", efeito: "+proficiência no dano" }],
-  "B": [{ nome: "Armas Aprimoradas", efeito: "Armas favoritas +1 e contam como mágicasArmas favoritas +1 e contam como mágicas" }],
-  "A": [{ nome: "Investida Brutal", efeito: "+3m movimento; corrida total permite derrubar (DT 8+prof+For)" }],
-  "S": [{ nome: "Esquiva Reativa", efeito: "Reação: esquiva; se evitar ataque, move 3m sem oportunidade" }],
-  "SS": [{ nome: "Crítico Aprimorado", efeito: "Crítico -1; crítico causa +1 dado de dano" }],
-  "SSS": [{ nome: "Estilo Supremo", efeito: "Crítico -2; dano extra máximo; abate dá ataque extra" }]
+  "B": [{ nome: "Armas Aprimoradas", efeito: "+1 e dano mágico" }],
+  "A": [{ nome: "Investida Brutal", efeito: "+3m movimento; pode derrubar (DT 8+prof+For)" }],
+  "S": [{ nome: "Esquiva Reativa", efeito: "Reação: esquiva + move 3m sem oportunidade" }],
+  "SS": [{ nome: "Crítico Aprimorado", efeito: "Crítico -1; +1 dado de dano" }],
+  "SSS": [{ nome: "Estilo Supremo", efeito: "Crítico -2; dano máximo; ataque extra" }]
 };
 
-function getHabilidadesAtuais(rank) {
-  let lista = [];
-  const ordem = ["D", "C", "B", "A", "S", "SS", "SSS"];
+const ordemRanks = ["D","C","B","A","S","SS","SSS"];
 
-  for (let r of ordem) {
-    if (habilidadesPorRank[r]) {
-      lista = lista.concat(habilidadesPorRank[r]);
-    }
-    if (r === rank) break;
-  }
-
-  return lista;
-}
-
-// ⚔️ DANO
+/* DANO */
 function calcularDano() {
-  const rank = calcularRank(estado.pontos);
+  let dano = danoBase;
+  let tipo = "Físico";
 
-  let dano = personagem.danoBase;
-  let magico = false;
+  const rank = getRank(pontos);
 
-  if (["C","B","A","S","SS","SSS"].includes(rank)) {
-    dano += personagem.proficiencia;
+  if (rank !== null) {
+
+    // C+
+    if (["C","B","A","S","SS","SSS"].includes(rank)) {
+      dano += proficiencia;
+    }
+
+    // B+
+    if (["B","A","S","SS","SSS"].includes(rank)) {
+      dano += 1;
+      tipo = "Mágico";
+    }
   }
 
-  if (["B","A","S","SS","SSS"].includes(rank)) {
-    dano += 1;
-    magico = true;
-  }
-
-  return { dano, magico };
+  document.getElementById("dano").innerText = dano;
+  document.getElementById("tipoDano").innerText = tipo;
 }
 
-// 🎮 AÇÕES
-function acertou() {
-  estado.pontos = Math.min(estado.pontos + 1, 10);
-  atualizarUI();
-}
+/* RENDER */
+function renderHabilidades() {
+  const container = document.getElementById("habilidades");
+  container.innerHTML = "";
 
-function errou() {
-  const rank = calcularRank(estado.pontos);
+  const rankAtual = getRank(pontos);
+  const indexAtual = rankAtual ? ordemRanks.indexOf(rankAtual) : -1;
 
-  if (["D","C","B","A"].includes(rank)) estado.pontos -= 1;
-  else if (["S","SS"].includes(rank)) estado.pontos -= 2;
-  else if (rank === "SSS") estado.pontos -= 3;
+  ordemRanks.forEach((rank, i) => {
+    habilidadesPorRank[rank].forEach(hab => {
 
-  estado.pontos = Math.max(estado.pontos, 0);
-  atualizarUI();
-}
+      const ativo = rankAtual !== null && i <= indexAtual;
 
-function ativarDevilTrigger() {
-  estado.pontos = Math.min(estado.pontos + 2, 10);
+      const div = document.createElement("div");
+      div.classList.add("card");
+      div.classList.add(ativo ? "ativo" : "bloqueado");
 
-  const botao = document.querySelector(".devil");
-  botao.classList.toggle("ativo");
+      div.innerHTML = `
+        <h3>${hab.nome}</h3>
+        <p>${hab.efeito}</p>
+        ${!ativo ? `<span class="lock">🔒 desbloqueia no rank ${rank}</span>` : ""}
+      `;
 
-  atualizarUI();
-}
-
-// 🖥️ UI
-function atualizarUI() {
-  const rank = calcularRank(estado.pontos);
-
-  document.getElementById("pontos").innerText = estado.pontos;
-  document.getElementById("rank").innerText = rank;
-
-  const resultado = calcularDano();
-  document.getElementById("dano").innerText =
-    resultado.magico ? `${resultado.dano} (Mágico)` : `${resultado.dano} (Físico)`;
-
-  const ul = document.getElementById("habilidades");
-  ul.innerHTML = "";
-
-  getHabilidadesAtuais(rank).forEach(hab => {
-    const li = document.createElement("li");
-    li.innerHTML = `<strong>${hab.nome}</strong><br><small>${hab.efeito}</small>`;
-    ul.appendChild(li);
+      container.appendChild(div);
+    });
   });
 }
 
-// 🚀 START
-atualizarUI();
+/* UPDATE */
+function atualizar() {
+  document.getElementById("pontos").innerText = pontos;
+
+  const rank = getRank(pontos);
+  const rankEl = document.getElementById("rank");
+
+  if (!rank) {
+    rankEl.innerText = "-";
+    rankEl.className = "";
+  } else {
+    rankEl.innerText = rank;
+    rankEl.className = "";
+    rankEl.classList.add(rank);
+  }
+
+  let porcentagem = (pontos / max) * 100;
+  document.getElementById("progresso").style.width = porcentagem + "%";
+
+  renderHabilidades();
+  calcularDano();
+
+  const rankTopo = document.getElementById("rankTopo");
+
+if (rankTopo) {
+  rankTopo.innerText = rank ? rank : "-";
+}
+
+
+}
+
+/* BOTÕES */
+function acerto() {
+  console.log("ACERTO");
+  pontos += 1;
+  if (pontos > max) pontos = max;
+  atualizar();
+}
+
+function erro() {
+  console.log("ERRO");
+  if (pontos === 0) return;
+
+  const rank = getRank(pontos);
+
+  if (["D","C","B","A"].includes(rank)) {
+    pontos -= 1;
+  } else if (["S","SS"].includes(rank)) {
+    pontos -= 2;
+  } else if (rank === "SSS") {
+    pontos -= 3;
+  }
+
+  if (pontos < 0) pontos = 0;
+
+  atualizar();
+}
+
+function devil() {
+  console.log("DEVIL");
+  pontos += 3;
+  if (pontos > max) pontos = max;
+  atualizar();
+}
+
+let bloqueado = false;
+
+function devil() {
+  if (bloqueado) return;
+  bloqueado = true;
+
+  pontos += 3;
+  if (pontos > max) pontos = max;
+  atualizar();
+
+  setTimeout(() => bloqueado = false, 100);
+}
