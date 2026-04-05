@@ -1,0 +1,96 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: radial-gradient(circle, #0b0b0b, #000);
+  color: white;
+  text-align: center; /* 🔥 centraliza tudo */
+}
+
+/* CONTEÚDO */
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 15px;
+  padding-bottom: 100px;
+}
+
+/* TEXTOS */
+h1 {
+  font-size: 22px;
+}
+
+p {
+  font-size: 16px;
+}
+
+/* LISTA */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+/* 🔥 HABILIDADES CENTRALIZADAS */
+ul li {
+  background: #1a1a1a;
+  padding: 12px;
+  margin: 8px auto;
+  border-radius: 10px;
+
+  max-width: 90%; /* deixa tipo card no meio */
+  text-align: center; /* centraliza texto dentro */
+}
+
+/* 🎮 HUD */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(6px);
+
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+}
+
+/* BOTÕES */
+.bottom-bar button {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+
+  font-weight: bold;
+  color: rgb(224, 224, 224);
+  cursor: pointer;
+
+  transition: 0.15s;
+}
+
+/* ACERTO */
+.acerto {
+  flex: 2;
+  background: linear-gradient(45deg, #425f52, #016935);
+  color: black;
+}
+
+/* ERRO */
+.erro {
+  background: linear-gradient(45deg, #4e2727, #410000);
+}
+
+/* DEVIL */
+.devil {
+  background: linear-gradient(45deg, #7987af, #031653);
+}
+
+/* CLICK */
+.bottom-bar button:active {
+  transform: scale(0.92);
+}
